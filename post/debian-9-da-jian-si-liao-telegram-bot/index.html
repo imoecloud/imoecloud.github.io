@@ -1,0 +1,236 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Debian 9 搭建私聊 Telegram Bot | iMoe Cloud</title>
+<link rel="shortcut icon" href="http://blog.imoe.ink//favicon.ico?v=1555328888398">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="http://blog.imoe.ink//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="http://blog.imoe.ink/">
+  <img class="avatar" src="http://blog.imoe.ink//images/avatar.png?v=1555328888398" alt="">
+  </a>
+  <h1 class="site-title">
+    iMoe Cloud
+  </h1>
+  <p class="site-description">
+    静水深流
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+      
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Debian 9 搭建私聊 Telegram Bot
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2018-12-12 ·
+              </time>
+              
+                <a href="http://blog.imoe.ink//tag/gridea" class="post-tags">
+                  # Gridea
+                </a>
+              
+            </div>
+            
+              <div class="post-feature-image" style="background-image: url('http://blog.imoe.ink//post-images/debian-9-da-jian-si-liao-telegram-bot.png')">
+              </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>最近看到了Github上面一个开源的项目<a href="https://github.com/Elepover/pmcenter/blob/master/README_zh.md">PmCenter</a>，可以通过此项目来搭建一个私聊Bot，解决+86用户不能私聊的问题</p>
+</blockquote>
+<p>此教程仅在Vultr Debian 9 测试通过，不保证其他Linux系统的可用性，不建议使用minimal系统，精简得太厉害</p>
+<hr>
+<h3 id="安装-net-core-sdk">安装 NET Core SDK</h3>
+<h4 id="更新以及安装组件">更新以及安装组件</h4>
+<pre><code>apt-get update
+apt-get install unzip curl sudo libunwind8 gettext apt-transport-https
+</code></pre>
+<h4 id="注册产品密钥以及产品源">注册产品密钥以及产品源</h4>
+<pre><code>curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor &gt; microsoft.gpg
+sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+sudo sh -c 'echo &quot;deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main&quot; &gt; /etc/apt/sources.list.d/dotnetdev.list'
+</code></pre>
+<h4 id="install-net-core-sdk">Install NET Core SDK</h4>
+<pre><code>sudo apt-get update
+sudo apt-get install dotnet-sdk-2.0.0
+</code></pre>
+<p>将 dotnet 添加到 PATH</p>
+<pre><code>export PATH=$PATH:$HOME/dotnet
+</code></pre>
+<p>检查是否安装成功</p>
+<pre><code>dotnet --version
+</code></pre>
+<p>出现</p>
+<pre><code>root@vultr:~# dotnet --version
+2.0.0
+</code></pre>
+<p>即安装成功</p>
+<hr>
+<h3 id="安装net-core-runtime">安装.NET Core Runtime</h3>
+<h4 id="注册microsoft密钥和订阅源">注册Microsoft密钥和订阅源</h4>
+<pre><code>wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor &gt; microsoft.asc.gpg
+sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+wget -q https://packages.microsoft.com/config/debian/9/prod.list
+sudo mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+sudo chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+</code></pre>
+<h4 id="install-net-runtime">Install .NET Runtime</h4>
+<pre><code>sudo apt-get update
+sudo apt-get install aspnetcore-runtime-2.2
+</code></pre>
+<hr>
+<h3 id="运行-pmcenter-机器人">运行 pmcenter 机器人</h3>
+<h4 id="拉取源码">拉取源码</h4>
+<pre><code>mkdir pmcenter
+cd pmcenter
+wget https://ci.appveyor.com/api/projects/Elepover/pmcenter/artifacts/pmcenter.zip
+unzip pmcenter.zip
+</code></pre>
+<h4 id="运行">运行</h4>
+<pre><code>dotnet pmcenter.dll
+</code></pre>
+<p>第一次运行将会在<code>/root/pmcenter</code>目录下生成<code>pmcenter.json</code>配置文件，修改<code>APIKey</code>、<code>OwnerID</code>以及<code>LangURL</code>后其他使用默认配置即可</p>
+<p>配置文件说明</p>
+<pre><code>APIKey是Bot的密钥，Botfather里面可以查看
+OwnerID为主人TG账号的ID，第三方的TG（Plus message）可以看到，不要弄错了
+LangURL是语言文件地址
+</code></pre>
+<p>两份汉化语言文件地址：</p>
+<pre><code>正常一点的 https://raw.githubusercontent.com/Elepover/pmcenter/master/locales/pmcenter_locale_zh.json
+
+萌哒哒的 https://raw.githubusercontent.com/Elepover/pmcenter/master/locales/pmcenter_locale_zh.meow.json
+</code></pre>
+<hr>
+<h3 id="设置pmceter开机自启">设置pmceter开机自启</h3>
+<p>[scode type=&quot;lblue&quot;]Debian 9是带有rc.local服务，但是不带/etc/rc.local文件[/scode]</p>
+<p>手工添加一个<code>/etc/rc.local</code>文件</p>
+<pre><code>cat &lt;&lt;EOF &gt;/etc/rc.local
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will &quot;exit 0&quot; on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+cd /root/pmcenter &amp;&amp; dotnet pmcenter.dll
+exit 0
+EOF
+</code></pre>
+<p>然后赋予权限
+chmod +x /etc/rc.local</p>
+<p>启动接着<code>rc-local</code>服务</p>
+<pre><code>systemctl start rc-local
+</code></pre>
+<p>查看状态</p>
+<pre><code>systemctl status rc-local
+</code></pre>
+<hr>
+<p>机器人开启后，与Bot的对话中输入<code>/help</code>查看帮助信息</p>
+
+            </div>
+          </article>
+        </div>
+    
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '060b6ccf320e0bcb511c',
+    clientSecret: 'a32f12a278ab90507365f72008caea6ae0d2942a',
+    repo: 'imoecloud.github.io',
+    owner: 'imoecloud',
+    admin: ['imoecloud'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+    
+        <div class="site-footer">
+  Powered by <a href="https://imoe.ink" target="_blank">iMoe Cloud</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
